@@ -18,7 +18,7 @@ import javax.transaction.Transactional;
 
 
 @Transactional(SUPPORTS)
-public class AccountCRUD {
+public class AccountDBRepository {
 	
 	@PersistenceContext(unitName = "primary")
 	private EntityManager em;
@@ -57,6 +57,14 @@ public class AccountCRUD {
 			em.merge(accountInDB);
 		}
 		return "{\"message\"; \"account sucessfully updated\"}";
+	}
+	
+	public void setUtil(JSONUtil util) {
+		this.util = util;
+	}
+	
+	public void setManager(EntityManager em) {
+		this.em = em;
 	}
 	
 }
