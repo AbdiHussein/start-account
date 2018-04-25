@@ -1,12 +1,12 @@
 package com.qa.service.repository;
 
-import java.util.List;
-
-
+import java.util.Collection;
+import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import javax.persistence.Query;
+
 
 
 import com.qa.domain.Account;
@@ -18,7 +18,8 @@ import javax.transaction.Transactional;
 
 
 @Transactional(SUPPORTS)
-public class AccountDBRepository {
+@Default
+public class AccountDBRepository implements AccountRepository {
 	
 	@PersistenceContext(unitName = "primary")
 	private EntityManager em;
@@ -26,10 +27,14 @@ public class AccountDBRepository {
 	@Inject
 	private JSONUtil util;
 	
-	public List<Account>getAllAccounts(){ 
-		TypedQuery<Account>query = em.createQuery("Select a from Account a", Account.class);
-		return query.getResultList();
+	@Override
+	public String getAllAccounts() {
+		Query query = em.createQuery("Select a FROM Account a");
+		Collection<Account> accounts = (Collection<Account>) query.getResultList();
+		return util.getJSONForObject(accounts);
 	}
+	
+	@Override
 	@Transactional(REQUIRED)
 	public String createAnAccount(String account) {
 		Account anAccount = util.getObjectForJSON(account, Account.class);
@@ -40,6 +45,7 @@ public class AccountDBRepository {
 		return em.find(Account.class, id);
 	}
 	
+	@Override
 	@Transactional(REQUIRED)
 	public String deleteAccount(Long id) {
 		Account accountDB = findAnAccount(id);
@@ -48,6 +54,8 @@ public class AccountDBRepository {
 		}
 		return "{\"message\": \"account successfully deleted\"}";
 	}
+	
+	@Override
 	@Transactional(REQUIRED)
 	public String updateAnAccount(Long id, String accountToUpdate) {
 		Account updatedAccount = util.getObjectForJSON(accountToUpdate, Account.class);
